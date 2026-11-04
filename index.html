@@ -6,13 +6,14 @@
   <title>Mail Ballot Answers</title>
   <meta name="description" content="Ask when, where and how to vote by mail in your state.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=Public+Sans:wght@400;600;800&display=swap">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=Public+Sans:wght@400;600;800&family=Space+Grotesk:wght@700&display=swap">
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
+  <div class="hero-banner"></div>
   <main class="wrap">
     <header>
-      <p class="kicker"><span data-newsroom>Your Newsroom</span> · Voter guide</p>
+      <div class="pill-label"><span class="glowing-dot"></span><span data-newsroom>Your Newsroom</span> · Voter guide</div>
       <h1>Ask about voting by mail</h1>
       <p>Deadlines, ballot requests, ID and witness rules for the <span data-election>2026 general election</span>, for all 50 states and D.C.</p>
     </header>
@@ -29,7 +30,7 @@
 
     <footer>
       <p>Answers come from a spreadsheet our reporters check against each state's official election office. Rules can change quickly near an election, so confirm with your state or local election office before you vote.</p>
-      <p id="status" class="status">Loading voting data…</p>
+      <p id="status" class="status"><span class="status-dot"></span>Loading voting data…</p>
     </footer>
   </main>
 
