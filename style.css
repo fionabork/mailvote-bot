@@ -1,39 +1,339 @@
-I'm attaching my chatbot's index.html, style.css, and a background image. Restyle the page with a "night map" look based on the image. Change only the visual design: keep every class name, id and the page structure the same, and don't touch any JavaScript.
+/* Layout: one narrow column, like a ballot instruction sheet. Header, chat log, question bar. */
+:root {
+  --paper: #f6f3ff;
+  --card: rgba(255, 255, 255, 0.75);
+  --ink: #1b1535;
+  --muted: #5e5485;
+  --rule: rgba(94, 84, 133, 0.2);
+  --accent: #7c3aed;
+  --accent-ink: #ffffff;
+  --stamp: #d97706;
+  --you: linear-gradient(135deg, #6d28d9, #9333ea);
+  --font-body: "Public Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --paper: #0b0a1c; 
+    --card: rgba(26, 22, 53, 0.75); 
+    --ink: #eeeaff; 
+    --muted: #a9a3cc;
+    --rule: rgba(169, 163, 204, 0.15); 
+    --accent: #8b5cf6; 
+    --accent-ink: #eeeaff; 
+    --stamp: #ffd29a;
+    --you: linear-gradient(135deg, #6d28d9, #9333ea); 
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --paper: #0b0a1c; 
+  --card: rgba(26, 22, 53, 0.75); 
+  --ink: #eeeaff; 
+  --muted: #a9a3cc;
+  --rule: rgba(169, 163, 204, 0.15); 
+  --accent: #8b5cf6; 
+  --accent-ink: #eeeaff; 
+  --stamp: #ffd29a;
+  --you: linear-gradient(135deg, #6d28d9, #9333ea); 
+  color-scheme: dark;
+}
 
+* { box-sizing: border-box; }
+body {
+  margin: 0; background: var(--paper); color: var(--ink);
+  font: 16px/1.55 var(--font-body);
+  position: relative;
+  min-height: 100vh;
+}
 
+/* Ambient glows */
+body::before {
+  content: "";
+  position: fixed;
+  top: -100px;
+  left: -100px;
+  width: 400px;
+  height: 400px;
+  background: radial-gradient(circle, rgba(139, 92, 246, 0.15) 0%, transparent 70%);
+  z-index: -1;
+  pointer-events: none;
+}
+body::after {
+  content: "";
+  position: fixed;
+  bottom: -100px;
+  right: -100px;
+  width: 400px;
+  height: 400px;
+  background: radial-gradient(circle, rgba(255, 210, 154, 0.1) 0%, transparent 70%);
+  z-index: -1;
+  pointer-events: none;
+}
 
-Give me back exactly two files, style.css and index.html, ready to upload to GitHub. The page should use the image as hero.jpg, in the same folder as index.html.
+/* Full-width hero banner with CSS mask fade */
+.hero-banner {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 380px;
+  background-image: linear-gradient(to right, rgba(11, 10, 28, 0.9) 0%, rgba(11, 10, 28, 0.4) 50%, transparent 100%), url('hero.jpg');
+  background-size: cover;
+  background-position: center;
+  z-index: 0;
+  -webkit-mask-image: linear-gradient(to bottom, rgba(0,0,0,1) 50%, rgba(0,0,0,0) 100%);
+  mask-image: linear-gradient(to bottom, rgba(0,0,0,1) 50%, rgba(0,0,0,0) 100%);
+  pointer-events: none;
+}
 
+.wrap {
+  max-width: 720px; margin: 0 auto;
+  padding-block: 40px 40px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  display: flex; flex-direction: column; gap: 20px;
+  position: relative;
+  z-index: 1;
+}
 
+header {
+  padding-top: 20px;
+}
 
-Style details:
+.pill-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font: 600 12px/1 var(--font-mono);
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: var(--stamp);
+  border: 1px solid var(--stamp);
+  padding: 6px 12px;
+  border-radius: 999px;
+  margin-bottom: 12px;
+  background: rgba(255, 210, 154, 0.05);
+}
 
-- Dark theme by default. Page background: deep indigo #0b0a1c with soft violet and amber glows. Text: #eeeaff. Muted text: #a9a3cc. Also include a light mode (pale lavender #f6f3ff background, dark text #1b1535).
+.glowing-dot {
+  width: 6px;
+  height: 6px;
+  background-color: var(--stamp);
+  border-radius: 50%;
+  box-shadow: 0 0 8px var(--stamp);
+}
+@media (prefers-reduced-motion: no-preference) {
+  .glowing-dot {
+    animation: twinkle 2s infinite ease-in-out;
+  }
+  @keyframes twinkle {
+    0%, 100% { opacity: 0.3; transform: scale(0.8); }
+    50% { opacity: 1; transform: scale(1.2); box-shadow: 0 0 12px var(--stamp); }
+  }
+}
 
-- Header: full-width banner using hero.jpg as the background, with a dark gradient over the left side so the white text is readable. The banner fades smoothly into the page at the bottom (use a CSS mask, not a hard edge). The header text stays aligned with the 720px content column.
+header .kicker { display: none; } /* Replaced/enhanced by pill-label */
+header h1 { 
+  font-family: "Space Grotesk", var(--font-body);
+  font-size: clamp(36px, 6vw, 60px); 
+  line-height: 1.1; 
+  margin: 0 0 12px; 
+  text-wrap: balance; 
+  font-weight: 700; 
+  color: #ffffff;
+  text-shadow: 0 2px 10px rgba(0,0,0,0.5);
+}
+header p { margin: 0; color: var(--muted); max-width: 60ch; font-size: 17px; }
+:root[data-theme="light"] header h1 { color: #1b1535; text-shadow: none; }
+:root[data-theme="light"] header p { color: #4a406e; }
 
-- Small label above the headline: a pill shape with amber text (#ffd29a), a thin amber border, and a small glowing amber dot.
+.log { display: flex; flex-direction: column; gap: 16px; min-height: 120px; }
+.msg { max-width: 100%; min-width: 0; }
 
-- Headline: Space Grotesk, bold, large (about 60px on desktop), white. Body text: Public Sans. Labels and small print: IBM Plex Mono. Load all three from Google Fonts in index.html.
+.msg.you {
+  align-self: flex-end; 
+  background: var(--you); 
+  color: #ffffff;
+  padding: 12px 16px;
+  border-radius: 16px 16px 4px 16px; 
+  max-width: 85%;
+  box-shadow: 0 4px 15px rgba(109, 40, 217, 0.3);
+}
 
-- Example-question buttons: rounded pills with a frosted-glass look and a violet glow on hover.
+.msg.bot {
+  position: relative;
+  padding-left: 20px;
+}
+.msg.bot::before {
+  content: "";
+  position: absolute;
+  left: 3px;
+  top: 8px;
+  bottom: 0;
+  width: 2px;
+  background: linear-gradient(to bottom, var(--accent), transparent);
+  opacity: 0.4;
+}
+.msg.bot::after {
+  content: "";
+  position: absolute;
+  left: 1px;
+  top: 2px;
+  width: 6px;
+  height: 6px;
+  background: var(--stamp);
+  border-radius: 50%;
+  box-shadow: 0 0 8px var(--stamp);
+}
+.msg.bot p { margin: 0 0 8px; max-width: 65ch; }
 
-- User's messages: right-aligned bubbles with a violet gradient (#6d28d9 to #9333ea) and white text.
+.state-card {
+  background: var(--card); 
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--rule); 
+  border-radius: 16px;
+  padding: 20px; 
+  display: grid; 
+  gap: 14px; 
+  position: relative;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+  overflow: hidden;
+}
+.state-card::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, #7c3aed, #9333ea, #ffd29a);
+}
 
-- Bot's messages: start with a small glowing amber dot on the left and a faint violet line running down.
+/* Faint wavy contour lines in bottom-right corner */
+.state-card::after {
+  content: "";
+  position: absolute;
+  bottom: -20px;
+  right: -20px;
+  width: 140px;
+  height: 140px;
+  background-image: radial-gradient(circle, transparent 40%, rgba(139, 92, 246, 0.08) 41%, rgba(139, 92, 246, 0.08) 43%, transparent 44%),
+                    radial-gradient(circle, transparent 60%, rgba(139, 92, 246, 0.06) 61%, rgba(139, 92, 246, 0.06) 63%, transparent 64%);
+  pointer-events: none;
+  z-index: 0;
+}
 
-- Answer cards: frosted dark panel, rounded corners (16px), a thin gradient strip along the top edge (violet to purple to amber), faint wavy contour lines in the bottom-right corner, violet uppercase mono labels, and thin dividers between each label/answer pair.
+.state-card * { position: relative; z-index: 1; }
+.state-card h2 { margin: 0; font-size: 22px; padding-right: 96px; font-weight: 800; }
+.state-card dl { margin: 0; display: grid; gap: 12px; }
+.state-card dt {
+  font: 600 11px/1.2 var(--font-mono); letter-spacing: .08em; text-transform: uppercase; color: var(--accent);
+}
+.state-card dd { margin: 4px 0 0; }
+.state-card .foot {
+  display: flex; flex-wrap: wrap; gap: 6px 16px; align-items: center;
+  border-top: 1px solid var(--rule); padding-top: 12px; font-size: 14px;
+}
+.state-card a { color: var(--accent); overflow-wrap: anywhere; text-decoration: none; font-weight: 600; }
+.state-card a:hover { text-decoration: underline; }
 
-- "Checked" postmark stamp: an amber double ring, tilted slightly.
+/* The "postmark": amber double ring, tilted slightly */
+.postmark {
+  position: absolute; top: 16px; right: 16px; width: 86px; height: 86px;
+  border: 2px double var(--stamp); border-radius: 50%; color: var(--stamp);
+  display: grid; place-content: center; text-align: center; transform: rotate(-6deg);
+  font: 600 9px/1.2 var(--font-mono); letter-spacing: .06em; text-transform: uppercase;
+  opacity: .9;
+  background: rgba(255, 210, 154, 0.03);
+  box-shadow: 0 0 10px rgba(255, 210, 154, 0.15);
+}
+.postmark b { display: block; font-size: 11px; margin-top: 2px; }
 
-- Question bar: sticky at the bottom with a frosted background, rounded input that glows violet when focused, and a violet gradient "Ask" button.
+.chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.chips button {
+  font: inherit; font-size: 14px; color: var(--ink); 
+  background: var(--card);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid var(--rule); 
+  border-radius: 999px; 
+  padding: 8px 14px; 
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+.chips button:hover { 
+  border-color: var(--accent); 
+  box-shadow: 0 0 15px rgba(139, 92, 246, 0.4);
+  transform: translateY(-1px);
+}
 
-- Footer: a small green glowing dot before the status text.
+form.ask { 
+  display: flex; 
+  gap: 10px; 
+  position: sticky; 
+  bottom: 16px; 
+  background: rgba(11, 10, 28, 0.85); 
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  padding: 12px; 
+  border-radius: 16px;
+  border: 1px solid var(--rule);
+  box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+  z-index: 10;
+}
+:root[data-theme="light"] form.ask {
+  background: rgba(246, 243, 255, 0.85);
+}
 
-- Gentle motion: messages slide up when they appear, and the amber dot twinkles. Turn motion off for people who prefer reduced motion.
+form.ask label { position: absolute; left: -9999px; }
+form.ask input {
+  flex: 1; min-width: 0; font: inherit; padding: 12px 16px; color: var(--ink);
+  background: var(--card); border: 1px solid var(--rule); border-radius: 12px;
+  transition: all 0.2s ease;
+}
+form.ask input:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 15px rgba(139, 92, 246, 0.4);
+  outline: none;
+}
+form.ask button {
+  font: 600 15px var(--font-body); padding: 0 20px; border: 0; border-radius: 12px;
+  background: linear-gradient(135deg, #7c3aed, #9333ea); 
+  color: var(--accent-ink); cursor: pointer;
+  box-shadow: 0 4px 15px rgba(124, 58, 237, 0.4);
+  transition: all 0.2s ease;
+}
+form.ask button:hover {
+  filter: brightness(1.1);
+  box-shadow: 0 6px 20px rgba(124, 58, 237, 0.6);
+}
+:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
 
-- It must work on phones: no sideways scrolling, and the postmark sits under the card title on narrow screens.
+.status { font: 12px/1.4 var(--font-mono); color: var(--muted); display: flex; align-items: center; gap: 8px; }
+.status-dot {
+  width: 6px;
+  height: 6px;
+  background-color: #10b981;
+  border-radius: 50%;
+  box-shadow: 0 0 8px #10b981;
+}
+.status.warn { color: var(--stamp); }
+.status.warn .status-dot { background-color: var(--stamp); box-shadow: 0 0 8px var(--stamp); }
 
+footer { font-size: 13px; color: var(--muted); border-top: 1px solid var(--rule); padding-top: 16px; margin-top: 10px; }
+footer p { margin: 0 0 8px; max-width: 65ch; }
 
+@media (max-width: 480px) {
+  .postmark { position: static; transform: none; width: auto; height: auto; border-radius: 8px; padding: 6px 12px; justify-self: start; border: 1px solid var(--stamp); border-style: dashed; }
+  .postmark b { display: inline; margin-left: 4px; }
+  .state-card h2 { padding-right: 0; }
+  .hero-banner { height: 300px; }
+}
 
-Keep the existing CSS variable names (--paper, --card, --ink, --muted, --rule, --accent, --accent-ink, --stamp, --font-body, --font-mono), because tests.html also uses this stylesheet.
+@media (prefers-reduced-motion: no-preference) {
+  .msg { animation: rise .25s cubic-bezier(0.16, 1, 0.3, 1); }
+  @keyframes rise { from { transform: translateY(8px); opacity: 0; } }
+}
